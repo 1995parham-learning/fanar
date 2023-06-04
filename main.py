@@ -1,7 +1,7 @@
-from connections.elastic import Elastic
+from elasticsearch import Elasticsearch
 
 if __name__ == '__main__':
-    conn = Elastic('host', 'port').connect()
+    conn = Elasticsearch('tcp://127.0.0.1:9200')
     print(conn.info())
 
     index = "index"
