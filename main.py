@@ -1,18 +1,15 @@
-import time
-
 from connections.elastic import Elastic
 
 if __name__ == '__main__':
-    client = Elastic('host', 'port')
-    conn = client.connect()
-    # print(conn.info())
+    conn = Elastic('host', 'port').connect()
+    print(conn.info())
 
     index = "index"
-    res = conn.search(index=index, body={
+    res = conn.search(index=index, query={
         "query": {
             "bool": {
                 "must": [
-                    {"term": {"key":	"value"}},
+                    {"term": {"key": "value"}},
                     {
                         "range": {
                             "key": {
