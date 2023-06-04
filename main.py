@@ -1,27 +1,44 @@
-from elasticsearch import Elasticsearch
+from dataclasses import dataclass, asdict
+from elasticsearch import Elasticsearch, NotFoundError
+from elasticsearch.helpers import scan
 
-if __name__ == '__main__':
-    conn = Elasticsearch('tcp://127.0.0.1:9200')
+INDEX = "students"
+
+
+@dataclass
+class Student:
+    name: str
+    family: str
+
+
+if __name__ == "__main__":
+    conn = Elasticsearch("tcp://127.0.0.1:9200", basic_auth=("elastic", "password"))
     print(conn.info())
 
-    index = "index"
-    res = conn.search(index=index, query={
-        "query": {
-            "bool": {
-                "must": [
-                    {"term": {"key": "value"}},
-                    {
-                        "range": {
-                            "key": {
-                                "gte": "leat value",
-                                "lte": "most value"
-                            }
-                        }
-                    }
-                ]
-            }
-        }
-    })
+    try:
+        conn.get(index=INDEX, id="9231058")
+    except NotFoundError:
+        conn.create(
+            index=INDEX,
+            id="9231058",
+            document=asdict(
+                Student(
+                    name="Parham",
+                    family="Alvani",
+                )
+            ),
+        )
 
-    print(res)
-    print(res['hits']['hits'][0]['_source'])
+    for res in scan(
+        conn,
+        index=INDEX,
+        query={
+            "query": {
+                "match": {
+                    "name": "Parham",
+                }
+            }
+        },
+    ):
+        print(res)
+        print(Student(**res["_source"]))
